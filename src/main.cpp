@@ -1,8 +1,11 @@
 #include <Arduino.h>
 /*
- * Demo code for driving multiple digital RGB(W) strands using esp32_digital_led_lib
+ * ESP32 Project to drive SK6812 WWA LEDs to light my garden.
+ * Uses the ESP 32 Digital LED library
  *
- * Modifications Copyright (c) 2017-2019 Martin F. Falatic
+ * Modifications Copyright (c) 2019 Kevin Dolan
+ *
+ * Original Copyright (c) 2017-2019 Martin F. Falatic
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com
@@ -32,7 +35,7 @@
 #include <math.h>
 #include "esp32_digital_led_lib.h"
 #include "esp32_digital_led_funcs.h"
-#include "Fader.cpp"
+#include "WWAcenterFader.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
   // No extras
@@ -158,8 +161,6 @@ void setup()
 
   delay(100);
   Serial.println("Init complete");
-
-
 }
 
 ulong lastMotionEvent;
@@ -184,7 +185,7 @@ void loop()
 
           fade->turnOn();
 		  }
-      fade->faderTask();
+      fade->update();
 
 
 
