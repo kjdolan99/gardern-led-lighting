@@ -56,13 +56,28 @@ public:
   virtual void turnOn();
   void fadeOff();
   void setStep(int s);
-  void setFadeType(fadeType f);
-  void setDirection(bool d);
-  void setFade(bool f);
-  void setMaxBrightness(uint8_t mb);
-  void setStepSize(uint8_t s );
-  static int limitRange(int val, int min, int max);
-  uint8_t limitByte(int val);
-  static pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness);
-  pixelColor_t scaleWithMaxBrightness(pixelColor_t p, uint8_t brightness);
+  inline void setFadeType(fadeType f) {ft = f;}
+  inline void setDirection(bool d) {direction = d;}
+  inline void setFade(bool f) {fading = f;}
+  inline void setMaxBrightness(uint8_t mb) {maxBrightness = mb;}
+  inline void setStepSize(uint8_t s ) {stepSize = s;}
+  pixelColor_t scaleMaxBrightness(pixelColor_t p, uint8_t brightness);
 };
+static inline int limitRange(int val, int min, int max)
+{
+  val = val < min ? min : val;
+  val = val > max ? max : val;
+  return val;
+}
+static inline uint8_t limitByte(int val) { return limitRange(val, 0, 255); }
+static inline pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness)
+{
+  if(brightness == 255) return p;
+  if(brightness == 0) return pixelOff;
+  pixelColor_t v;
+  v.r = p.r != 0 ? p.r != 255 ?  p.r * brightness / 255 : 255 : 0;
+  v.g = p.g != 0 ? p.g != 255 ?  p.g * brightness / 255 : 255 : 0;
+  v.b = p.b != 0 ? p.b != 255 ?  p.b * brightness / 255 : 255 : 0;
+  v.w = p.w != 0 ? p.w != 255 ?  p.w * brightness / 255 : 255 : 0;
+  return v;
+}

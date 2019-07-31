@@ -138,8 +138,8 @@ void IRAM_ATTR handleInterrupt() {
   portEXIT_CRITICAL_ISR(&mux);
 }
 
-WWAcenterFader * fade;
 //**************************************************************************//
+WWAcenterFader * fade;
 void setup()
 {
   Serial.begin(115200);

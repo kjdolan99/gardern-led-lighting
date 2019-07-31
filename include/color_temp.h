@@ -1,5 +1,3 @@
-pixelColor_t pixelFromColorTemp(uint16_t colorTemp, uint8_t brightLimit);
-
 const uint8_t color_temp_table[][3] =
 {//{amber, cool white, warm white} color values respectively
 {255, 0, 0},

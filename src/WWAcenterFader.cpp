@@ -27,7 +27,6 @@
  */
 
 #include "WWAcenterFader.h"
-#include "color_temp.h"
 
 WWAcenterFader::WWAcenterFader(strand_t  * s) : Fader(s)
 {
@@ -43,8 +42,8 @@ WWAcenterFader::WWAcenterFader(strand_t  * s) : Fader(s)
 }
 pixelColor_t WWAcenterFader::fadeFunction(int step, int position)
 {
-  int p = position > half_index ? strand->numPixels - position - 1 : position;
-  return pixelFromColorTemp(min_color_temp + (step + p) * 20, step + p);
+  uint8_t p = position > half_index ? strand->numPixels - position - 1 : position;
+  return scaleBrightness( pixelFromColorTemp(min_color_temp + (step + p) * 20),  limitByte(step + p));
 }
 void WWAcenterFader::ledDelay()
 {

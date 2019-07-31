@@ -105,31 +105,7 @@ void Fader::setStep(int s)
   step = s;
   update();
 }
-void Fader::setFadeType(fadeType f) {ft = f;}
-void Fader::setDirection(bool d) {direction = d;}
-void Fader::setFade(bool f) {fading = f;}
-void Fader::setMaxBrightness(uint8_t mb) {maxBrightness = mb;}
-void Fader::setStepSize(uint8_t s ) {stepSize = s;}
-static int limitRange(int val, int min, int max)
-{
-  val = val < min ? min : val;
-  val = val > max ? max : val;
-  return val;
-}
-uint8_t Fader::limitByte(int val) { return limitRange(val, 0, 255); }
-
-static pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness)
-{
-  if(brightness == 255) return p;
-  if(brightness == 0) return pixelOff;
-  pixelColor_t v;
-  v.r = p.r != 0 ? p.r != 255 ?  p.r * brightness / 255 : 255 : 0;
-  v.g = p.g != 0 ? p.g != 255 ?  p.g * brightness / 255 : 255 : 0;
-  v.b = p.b != 0 ? p.b != 255 ?  p.b * brightness / 255 : 255 : 0;
-  v.w = p.w != 0 ? p.w != 255 ?  p.w * brightness / 255 : 255 : 0;
-  return v;
-}
-pixelColor_t Fader::scaleWithMaxBrightness(pixelColor_t p, uint8_t brightness)
+pixelColor_t Fader::scaleMaxBrightness(pixelColor_t p, uint8_t brightness)
 {
   pixelColor_t v;
    v = brightness != 0 ? brightness != 255 ?  scaleBrightness(p, brightness) : v : pixelOff;
