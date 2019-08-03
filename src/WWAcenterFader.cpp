@@ -32,18 +32,19 @@ WWAcenterFader::WWAcenterFader(strand_t  * s) : Fader(s)
 {
   half_index = strand->numPixels / 2;
   onDelay_ms = 20;
-  offDelay_ms = onDelay_ms * 20;
-  offTimeout_ms = 60000;
+  offDelay_ms = onDelay_ms * 2;
+  offTimeout_ms = 5000;
+  min_color_temp = 2500;
   maxStep = 255 - half_index;
   setDirection(true);
-  maxBrightness = 255;
+  maxBrightness = 128;
   ft = STOP_AT_END;
   lastOnTime = millis();
 }
 pixelColor_t WWAcenterFader::fadeFunction(int step, int position)
 {
-  uint8_t p = position > half_index ? strand->numPixels - position - 1 : position;
-  return scaleBrightness( pixelFromColorTemp(min_color_temp + (step + p) * 20),  limitByte(step + p));
+  uint16_t p = position > half_index ? strand->numPixels - position - 1 : position;
+  return scaleMaxBrightness( pixelFromColorTemp(min_color_temp + (step + p) * 20), limitByte(step + p));
 }
 void WWAcenterFader::ledDelay()
 {

@@ -32,7 +32,7 @@
 class WWAcenterFader : public Fader
 {
 private:
-  const uint16_t min_color_temp = 2500;
+  uint16_t min_color_temp;
   int half_index;
   int onDelay_ms;
   int offDelay_ms;
@@ -60,9 +60,9 @@ static inline pixelColor_t pixelFromColorTemp(uint16_t colorTemp)
   color_temp_index = (colorTemp - color_temp_min) / color_temp_step;
 
   pixelColor_t v;
-  v.r = color_temp_table[color_temp_index][0]; // * brightLimit / 256;
-  v.g = color_temp_table[color_temp_index][1]; // * brightLimit / 256;
-  v.b = color_temp_table[color_temp_index][2]; // * brightLimit / 256;
+  v.r = color_temp_table[color_temp_index][0]; 
+  v.g = color_temp_table[color_temp_index][1]; 
+  v.b = color_temp_table[color_temp_index][2]; 
   v.w = 0;
   return v;
 }

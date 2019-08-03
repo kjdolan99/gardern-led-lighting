@@ -30,17 +30,19 @@
 
 Fader::Fader(strand_t * s): strand(s)
 {
-  fading=false;
-  direction=false;
+  fading=true;
+  direction=true;
   step=1;
   delay_ms = 10;
-}
+  maxStep = 255;
+  stepSize = 1;
+  maxBrightness = 255;
+  ft = CONTINUOUS;
+};
 pixelColor_t Fader::fadeFunction(int step, int position)
 {
   return pixelFromRGB(step, step, step);
 }
-void Fader::ledDelay() { delay(delay_ms); }
-
 void Fader::faderTask()
 {
   if(fading)
@@ -83,6 +85,7 @@ void Fader::update()
   faderTask();
   digitalLeds_drawPixels(&strand, 1);
 }
+void Fader::ledDelay() { delay(delay_ms); }
 void Fader::turnOff()
 {
   digitalLeds_resetPixels(&strand, 1);
@@ -101,14 +104,12 @@ void Fader::fadeOff()
 }
 void Fader::setStep(int s)
 {
-  s = s > 0 ? s : 0;
-  step = s;
+  step = limitRange(s, 0, maxStep);
   update();
 }
 pixelColor_t Fader::scaleMaxBrightness(pixelColor_t p, uint8_t brightness)
 {
-  pixelColor_t v;
-   v = brightness != 0 ? brightness != 255 ?  scaleBrightness(p, brightness) : v : pixelOff;
-   v = maxBrightness != 0 ? maxBrightness != 255 ?  scaleBrightness(p, maxBrightness) : v : pixelOff;
-   return v;
+   p = brightness == 0 ? pixelOff: brightness == 255 ? p: scaleBrightness(p, brightness);
+   p = maxBrightness == 0 ? pixelOff: maxBrightness == 255 ? p: scaleBrightness(p, maxBrightness);
+   return p;
 }

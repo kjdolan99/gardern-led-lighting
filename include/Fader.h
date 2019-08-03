@@ -74,10 +74,10 @@ static inline pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness)
 {
   if(brightness == 255) return p;
   if(brightness == 0) return pixelOff;
-  pixelColor_t v;
-  v.r = p.r != 0 ? p.r != 255 ?  p.r * brightness / 255 : 255 : 0;
-  v.g = p.g != 0 ? p.g != 255 ?  p.g * brightness / 255 : 255 : 0;
-  v.b = p.b != 0 ? p.b != 255 ?  p.b * brightness / 255 : 255 : 0;
-  v.w = p.w != 0 ? p.w != 255 ?  p.w * brightness / 255 : 255 : 0;
-  return v;
+
+  p.r =  p.r * brightness / 255; 
+  p.g =  p.g * brightness / 255; 
+  p.b =  p.b * brightness / 255; 
+  p.w =  p.w * brightness / 255; 
+  return p;
 }

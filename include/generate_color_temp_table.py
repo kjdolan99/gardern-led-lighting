@@ -3,7 +3,7 @@
 import math
 
 
-f= open("color_temp_table.h","w+")
+f= open("color_temp.h","w+")
 f.write("const byte color_temp_table[][3] = \n{")
 f.write("//{amber, cool white, warm white} color values respectively\n")
 
@@ -14,8 +14,8 @@ amber_width = 23
 
 ww_start = 0
 ww_stop = 512
-ww_max = 255
-ww_width = 23
+ww_max = 130
+ww_width = 27
 
 cw_start = 256
 cw_stop = 768
