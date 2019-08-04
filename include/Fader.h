@@ -26,6 +26,7 @@
 
 #include <Arduino.h>
 #include "esp32_digital_led_lib.h"
+#include "freertos/task.h"
 
 enum fadeType {CONTINUOUS, STOP_AT_END, OSCILLATE};
 const pixelColor_t pixelOff = pixelFromRGBW(0,0,0,0);
@@ -38,20 +39,20 @@ protected:
   volatile int maxStep;
   volatile bool direction;
   virtual pixelColor_t fadeFunction(int step, int position);
-  virtual void ledDelay();
   virtual void nextStep();
-  virtual void faderTask();
+  virtual void updatePixels();
 private:
   volatile int step;
-
 public:
-  void update();
   volatile bool fading, updating;
   volatile int stepSize;
   uint8_t maxBrightness;
   volatile ulong delay_ms;
+  TaskHandle_t taskHandle = NULL;
 
   explicit Fader(strand_t * s);
+  void update();
+  virtual ulong ledDelay();
   void turnOff();
   virtual void turnOn();
   void fadeOff();
@@ -75,9 +76,42 @@ static inline pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness)
   if(brightness == 255) return p;
   if(brightness == 0) return pixelOff;
 
-  p.r =  p.r * brightness / 255; 
-  p.g =  p.g * brightness / 255; 
-  p.b =  p.b * brightness / 255; 
-  p.w =  p.w * brightness / 255; 
+  p.r =  p.r * brightness / 255;
+  p.g =  p.g * brightness / 255;
+  p.b =  p.b * brightness / 255;
+  p.w =  p.w * brightness / 255;
   return p;
+}
+static inline void faderRunner(void * par)
+{
+  Fader* fader = (Fader*)par;
+  TickType_t xLastWakeTime;
+
+    // Initialise the xLastWakeTime variable with the current time.
+  xLastWakeTime = xTaskGetTickCount ();
+
+  while(true)
+  {
+    fader->update();
+    delay(fader->ledDelay());//vTaskDelayUntil( &xLastWakeTime, (TickType_t)fader->ledDelay() );
+  }
+}
+static inline void startTask(Fader * fader)
+{
+
+  xTaskCreatePinnedToCore(
+                    faderRunner,   /* Function to implement the task */
+                    "faderTask", /* Name of the task */
+                    10000,      /* Stack size in words */
+                    (void*)fader,       /* Task input parameter */
+                    0,          /* Priority of the task */
+                    &fader->taskHandle,       /* Task handle. */
+                    0);
+}
+static inline void stopTask(Fader * fader)
+{
+  if(fader->taskHandle != NULL)
+  {
+    vTaskDelete( fader->taskHandle );
+  }
 }

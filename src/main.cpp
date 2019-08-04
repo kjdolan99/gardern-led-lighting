@@ -180,14 +180,11 @@ void loop()
 
 		      numberOfInterrupts++;
 		      //Motion Sensor Debuging
-		      //Serial.print("An interrupt has occurred. Total: ");
-		      //Serial.println(numberOfInterrupts);
+		      Serial.print("An interrupt has occurred. Total: ");
+		      Serial.println(numberOfInterrupts);
 
           fade->turnOn();
 		  }
-      fade->update();
-
-
 
   //digitalLeds_resetPixels(strands, STRANDCNT);
 
