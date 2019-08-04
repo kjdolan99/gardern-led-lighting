@@ -38,22 +38,18 @@ Fader::Fader(strand_t * s): strand(s)
   stepSize = 1;
   maxBrightness = 255;
   ft = CONTINUOUS;
+  startTask(this);
 };
 pixelColor_t Fader::fadeFunction(int step, int position)
 {
   return pixelFromRGB(step, step, step);
 }
-void Fader::faderTask()
+void Fader::updatePixels()
 {
-  if(fading)
-  {
-    for(int i = 0; i < strand->numPixels; i++)
+  for(int i = 0; i < strand->numPixels; i++)
     {
       strand->pixels[i]= fadeFunction(step, i);
     }
-    ledDelay();
-    nextStep();
-  }
 }
 void Fader::nextStep()
 {
@@ -82,14 +78,19 @@ void Fader::nextStep()
 }
 void Fader::update()
 {
-  faderTask();
-  digitalLeds_drawPixels(&strand, 1);
+  if(fading)
+  {
+    updating = true;
+    nextStep();
+    updatePixels();
+    digitalLeds_drawPixels(&strand, 1);
+    updating = false;
+  }
 }
-void Fader::ledDelay() { delay(delay_ms); }
+ulong Fader::ledDelay() { return delay_ms; }
 void Fader::turnOff()
 {
   digitalLeds_resetPixels(&strand, 1);
-  update();
   fading = false;
 }
 void Fader::turnOn()
@@ -105,7 +106,6 @@ void Fader::fadeOff()
 void Fader::setStep(int s)
 {
   step = limitRange(s, 0, maxStep);
-  update();
 }
 pixelColor_t Fader::scaleMaxBrightness(pixelColor_t p, uint8_t brightness)
 {
