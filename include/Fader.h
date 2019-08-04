@@ -29,6 +29,7 @@
 #include "freertos/task.h"
 #define INCLUDE_vTaskDelayUntil 1
 
+
 enum fadeType {CONTINUOUS, STOP_AT_END, OSCILLATE};
 const pixelColor_t pixelOff = pixelFromRGBW(0,0,0,0);
 
@@ -94,7 +95,7 @@ static inline void faderRunner(void * par)
   while(true)
   {
     fader->update();
-    vTaskDelayUntil( &xLastWakeTime, (TickType_t) fader->ledDelay() ); //delay(fader->ledDelay());
+    vTaskDelayUntil( &xLastWakeTime, (TickType_t) fader->ledDelay() );
   }
 }
 static inline void startTask(Fader * fader)
@@ -103,7 +104,8 @@ static inline void startTask(Fader * fader)
   xTaskCreatePinnedToCore(
                     faderRunner,   /* Function to implement the task */
                     "faderTask", /* Name of the task */
-                    1000,      /* Stack size in words */
+
+                    1000,
                     (void*)fader,       /* Task input parameter */
                     0,          /* Priority of the task */
                     &fader->taskHandle,       /* Task handle. */
