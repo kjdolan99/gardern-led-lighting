@@ -54,8 +54,7 @@ public:
 static inline pixelColor_t pixelFromColorTemp(uint16_t colorTemp)
 {
   uint32_t color_temp_index;
-  colorTemp = colorTemp < color_temp_min ? color_temp_min : colorTemp;
-  colorTemp = colorTemp > color_temp_max ? color_temp_max : colorTemp;
+  colorTemp = limitRange(colorTemp, color_temp_min, color_temp_max);
 
   color_temp_index = (colorTemp - color_temp_min) / color_temp_step;
 

@@ -36,10 +36,11 @@ Fader::Fader(strand_t * s): strand(s)
   delay_ms = 10;
   maxStep = 255;
   stepSize = 1;
-  maxBrightness = 255;
+  maxBrightness = strand->brightLimit;
   ft = CONTINUOUS;
-  startTask(this);
+  startFaderTask(this);
 };
+Fader::~Fader() { stopFaderTask(this); }
 pixelColor_t Fader::fadeFunction(int step, int position)
 {
   return pixelFromRGB(step, step, step);

@@ -1,4 +1,3 @@
-#include <Arduino.h>
 /*
  * ESP32 Project to drive SK6812 WWA LEDs to light my garden.
  * Uses the ESP 32 Digital LED library
@@ -32,9 +31,17 @@
  * THE SOFTWARE.
  */
 
-#include <math.h>
+#include <Arduino.h>
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+
+#include "WiFiCreds.h"
+//const char* ssid = "..........";
+//const char* password = "..........";
+
 #include "esp32_digital_led_lib.h"
-#include "esp32_digital_led_funcs.h"
 #include "WWAcenterFader.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -62,7 +69,7 @@ int MOTION_PIN = 35;
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"  // It's noisy here with `-Wall`
 
 strand_t STRANDS[] = { // Avoid using any of the strapping pins on the ESP32, anything >=32, 16, 17... not much left.
-  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_SK6812_V1, .brightLimit = 32, .numPixels =  64}
+  {.rmtChannel = 0, .gpioNum = 14, .ledType = LED_SK6812_V1, .brightLimit = 75, .numPixels =  150}
 };
 
 //strand_t STRAND0 = {.rmtChannel = 1, .gpioNum = 14, .ledType = LED_WS2812B_V3, .brightLimit = 24, .numPixels =  93,
@@ -128,7 +135,6 @@ boolean initStrands()
 volatile int interruptCounter = 0;
 int numberOfInterrupts = 0;
 
-
 portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 //Interrupt handler for the motion sensor
@@ -139,7 +145,7 @@ void IRAM_ATTR handleInterrupt() {
 }
 
 //**************************************************************************//
-WWAcenterFader * fade;
+WWAcenterFader * fader;
 void setup()
 {
   Serial.begin(115200);
@@ -155,38 +161,71 @@ void setup()
   pinMode(MOTION_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOTION_PIN), handleInterrupt, RISING);
 
-  fade = new WWAcenterFader(&STRANDS[0]);
-  fade->fading = true;
-  fade->turnOn();
+  fader = new WWAcenterFader(&STRANDS[0]);
+  fader->turnOn();
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
+    ESP.restart();
+  }
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
+
+  ArduinoOTA.begin();
+
+  Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
 
   delay(100);
   Serial.println("Init complete");
 }
 
-ulong lastMotionEvent;
-const int d = 10;
-
 //**************************************************************************//
 void loop()
 {
-
  //Handle Motion Events
   if(interruptCounter>0){
 
 		      portENTER_CRITICAL(&mux);
 		      interruptCounter=0;
 		      portEXIT_CRITICAL(&mux);
-		  	  lastMotionEvent = millis();
 
 		      numberOfInterrupts++;
 		      //Motion Sensor Debuging
-		      Serial.print("An interrupt has occurred. Total: ");
-		      Serial.println(numberOfInterrupts);
+		      //Serial.print("An interrupt has occurred. Total: ");
+		      //Serial.println(numberOfInterrupts);
 
-          fade->turnOn();
+          fader->turnOn();
 		  }
-
-  //digitalLeds_resetPixels(strands, STRANDCNT);
+  ArduinoOTA.handle();
 
   #if DEBUG_ESP32_DIGITAL_LED_LIB
     dumpDebugBuffer(0, digitalLeds_debugBuffer);

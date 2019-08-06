@@ -53,6 +53,7 @@ public:
   TaskHandle_t taskHandle = NULL;
 
   explicit Fader(strand_t * s);
+  virtual ~Fader();
   virtual void update();
   virtual ulong ledDelay();
   void turnOff();
@@ -84,13 +85,13 @@ static inline pixelColor_t scaleBrightness(pixelColor_t p, uint8_t brightness)
   p.w =  p.w * brightness / 255;
   return p;
 }
-static inline void faderRunner(void * par)
+static inline void faderTask(void * f)
 {
-  Fader* fader = (Fader*)par;
+  Fader* fader = (Fader*) f;
   TickType_t xLastWakeTime;
 
     // Initialise the xLastWakeTime variable with the current time.
-  xLastWakeTime = xTaskGetTickCount ();
+  xLastWakeTime = xTaskGetTickCount();
 
   while(true)
   {
@@ -98,20 +99,19 @@ static inline void faderRunner(void * par)
     vTaskDelayUntil( &xLastWakeTime, (TickType_t) fader->ledDelay() );
   }
 }
-static inline void startTask(Fader * fader)
+static inline void startFaderTask(Fader * fader)
 {
 
   xTaskCreatePinnedToCore(
-                    faderRunner,   /* Function to implement the task */
+                    faderTask,   /* Function to implement the task */
                     "faderTask", /* Name of the task */
-
                     1000,
                     (void*)fader,       /* Task input parameter */
                     0,          /* Priority of the task */
                     &fader->taskHandle,       /* Task handle. */
                     0);
 }
-static inline void stopTask(Fader * fader)
+static inline void stopFaderTask(Fader * fader)
 {
   if(fader->taskHandle != NULL)
   {
